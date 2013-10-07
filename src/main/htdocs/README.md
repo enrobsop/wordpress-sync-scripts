@@ -1,1 +1,0 @@
-This directory should be the WordPress root containing wp-config.php.
