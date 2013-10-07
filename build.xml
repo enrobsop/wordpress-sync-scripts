@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	File:		build-common.xml
+	Author:		Paul Osborne, Morley Computing Ltd.
+				http://www.javaphpprogrammer.co.uk/ 
+				http://www.morley-computing.co.uk/
+ -->
+<project name="build.xml">
+
+	<description>
+		Builds the project and provides development utilities.
+	</description>
+	
+	<!-- Create default targets and properties. -->
+	<import file="build-common.xml" />
+	<import file="build-remote-backup.xml" />
+	
+	<!--
+	 *
+	 * 
+	 * Configuration and environment targets.	
+	 * 
+	 *
+	-->
+	
+	<!--
+	 *
+	 * 
+	 * Development tool targets.	
+	 * 
+	 *
+	-->
+	
+	<target 
+		name		= "download"
+		description	= "Downloads the remote website overwriting the local database and webfiles."
+		depends		= "downloadRemote, extractDownload, installDownload" >
+		
+		<delete includeemptydirs="true" >
+			<fileset 
+				dir				= "${src.htdocs.dir}" 
+				excludes		= "**/performRemoteBackup.php, **/performRemoteInstall.php" 
+				defaultexcludes	= "false"	/>
+		</delete>
+
+		
+	</target>
+	
+	<target 
+		name		= "extractDownload"
+		description	= "Extracts the archive downloaded by download from the remote website."
+		depends		= ""
+	>
+
+		<mkdir dir="${build.dir}/downloads/${domain.name}" />
+		<untar
+			src			= "${build.dir}/downloads/${domain.name}-full-backup.tar.gz"
+			dest		= "${build.dir}/downloads/${domain.name}"
+			overwrite	= "true"
+			compression	= "gzip"
+		/>
+
+		<untar
+			src			= "${build.dir}/downloads/${domain.name}/db_dump.tar.gz"
+			dest		= "${build.dir}/downloads/sql"
+			overwrite	= "true"
+			compression	= "gzip"
+		/>
+
+	</target>
+	
+	<target 
+		name		= "installDownload"
+		description	= "Installs the files downloaded and extracted from the remote website."
+		depends 	= "initDb " 
+	>
+
+		<antcall target="mysqlScript" > 
+			<param name="exec.dir"	value="${build.dir}/downloads/sql" />
+			<param name="input.sql"	value="${build.dir}/downloads/sql/db_dump.sql" />
+		</antcall>
+		
+		<untar
+			src			= "${build.dir}/downloads/${domain.name}/${domain.name}.tar.gz"
+			dest		= "${src.htdocs.dir}"
+			overwrite	= "true"
+			compression	= "gzip"
+		/>
+		
+		<delete file="${src.htdocs.dir}/${backup.script.file}" />
+		
+	</target>
+		
+	
+	<!--
+	 *
+	 * 
+	 * Application build targets.	
+	 * 
+	 *
+	-->
+	
+	<target 
+		name		= "build" 
+		description	= "Build the application removing any unnecessary files, obfuscating source, compressing files etc." 
+	/>
+	
+	<target 
+		name		= "createProjectArchive" 
+		description	= "Creates an archive with all web and database files."
+		depends 	= "createDbArchive, createWebArchive"
+	>
+		<tar 
+			destfile	= "${dist.dir}/${domain.name}.tar.gz"
+			compression	= "gzip"
+		>
+			<fileset dir="${build.dir}/sql/" 	includes="${domain.name}_db.tar.gz"		/>
+			<fileset dir="${build.dir}/htdocs/"	includes="${domain.name}_web.tar.gz"	/>
+		</tar>
+	</target>
+	
+	<target 
+		name		= "createDbArchive"
+		description	= "Creates an archive containing database content and structure."
+		depends		= "clean, init, dbDump"
+	>
+		<tar 
+			basedir		= "${build.dir}/sql"
+			destfile	= "${build.dir}/sql/${domain.name}_db.tar.gz"
+			includes	= "${db.dbname}_combined.sql"
+			compression	= "gzip"
+		/>
+	</target>
+	
+	<target
+		name		= "createWebArchive" 
+		description	= "Creates an archive containing all web files."
+		depends		= "clean, init"
+	>
+		<tar 
+			basedir		= "${src.htdocs.dir}"
+			destfile	= "${build.dir}/htdocs/${domain.name}_web.tar.gz"
+			includes	= ""
+			excludes	= "**/performRemoteBackup.php, **/performRemoteInstall.php, **/wp-content/uploads/wpcf7_captcha/*"
+			compression	= "gzip"
+		/>
+	</target>
+	
+	<target 
+		name		= "upload"
+		description	= "Uploads a script install a database and website files."
+		depends 	= "createProjectArchive, uploadArchive, uploadInstallScript, executeRemoteInstallScript, deleteRemoteInstallScript"
+	/>
+
+	<target 
+		name		= "uploadArchive"
+		description	= "Uploads a database and web file archive to the remote server."
+		depends 	= ""
+	>
+		<ftp 
+			password	= "${ftp.password}" 
+			server		= "${ftp.host}" 
+			userid		= "${ftp.username}"
+			remotedir	= "${ftp.private.dir}"			
+		>
+			<fileset dir="${dist.dir}" includes="${domain.name}.tar.gz" />
+		</ftp>	
+	</target>	
+	
+	<!--
+	 *
+	 * 
+	 * Database build targets.	
+	 * 
+	 *
+	-->
+	
+
+	
+	<!--
+	 *
+	 * 
+	 * Test targets.	
+	 * 
+	 *
+	-->
+	
+	<target 
+		name		= "testAll" 
+		depends		= "runUnitTests, runFunctionalTests" 
+		description	= "Runs all Unit and functional tests." 
+	/>
+	
+	<target 
+		name		= "prepareTests" 
+		depends		= "init" 
+		description = "Prepares the environment for testing." />
+	
+	<target 
+		name		= "runUnitTests" 
+		depends		= "prepareTests" 
+		description	= "Runs all unit tests." >
+	</target>
+
+	<target 
+		name		= "runFunctionalTests" 
+		depends		= "prepareTests" 
+		description	= "Runs all functional tests.">
+	</target>	
+	
+	<!--
+	 *
+	 * 
+	 * Deployment targets.	
+	 * 
+	 *
+	-->
+
+	<target 
+		name			= "deploy" 
+		description		= "Deploy the application."
+		depends			= "build"
+	/>
+
+</project>

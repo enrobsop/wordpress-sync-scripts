@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	File:		build-common.xml
+	Author:		Paul Osborne, Morley Computing Ltd.
+				http://www.javaphpprogrammer.co.uk/ 
+				http://www.morley-computing.co.uk/
+ -->
+<project name="build-common.xml">
+	
+	<description>
+		Ant build script containing common targets for building and working on 
+		a remotely hosted website.
+	</description>
+	
+	<property	file		= "build.properties" />
+	<filter 	filtersfile	= "build.properties" />
+	
+	<!--
+	 *
+	 * 
+	 * Configuration and environment targets.	
+	 * 
+	 *
+	-->
+	
+	<target name="init" description="Initializes the build environment." >
+		<!-- Create the time and date stamps -->
+		<tstamp />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${build.dir}/htdocs" />
+		<mkdir dir="${build.dir}/sql" />
+		<mkdir dir="${build.dir}/logs" />
+	 	<mkdir dir="${build.dir}/test/logs"/>
+	 	<mkdir dir="${build.dir}/downloads"/>
+		<!-- Copy and filter SQL scripts -->
+		<copy
+			todir		="${build.dir}/sql"
+			filtering	="true"
+			description	="Copy sql to the build directing filtering any tokens such as db name."
+		>
+			<fileset dir="${src.sql.dir}" includes="*.sql" />
+		</copy>
+	</target>
+		
+	<target name="clean" description="Cleans the build environment." >
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />		
+	</target>
+
+
+	<!--
+	 *
+	 * 
+	 * Database build targets.	
+	 * 
+	 *
+	-->
+	
+	<target 
+		name		= "mysqlScript"
+		description	= "Uses mysql to run a script. Requires parameters: exec.dir, input.sql"
+	>
+		<exec dir="${exec.dir}" executable="mysql" failonerror="true" input="${input.sql}" >
+			<arg line="--user=${db.username} --password=${db.password} --host=${db.host} ${db.dbname}" />
+		</exec>
+	</target>
+	
+	<target 
+		name		= "initDb"
+		description	= "Initialize the database. Creates the database and assign a user."
+		depends		= "init"
+	>
+
+		<echo>WARNING: this will erase any existing database. To cancel, enter a null password.</echo>
+		
+		<!-- Prompt user for mysql root@localhost password -->
+		<input
+			message="Please enter the password for root@localhost:"
+			addproperty="mysql.root.pw"
+		/>
+
+		<echo>Creating MySQL database and user...</echo>
+		<exec dir="${build.dir}/sql" executable="mysql" failonerror="true" input="${build.dir}/sql/db_init.sql" >
+			<arg line="--user=root --password=${mysql.root.pw} --host=localhost" />
+		</exec>
+		<echo>Complete!</echo>
+
+	</target>
+	
+	<target 
+		name		= "createDb" 
+		description	= "Builds the database and adds all migrations." 
+		depends		= "buildDb"
+	/>
+
+	<target 
+		name		= "buildDb" 
+		description	= "Build the database." 
+		depends		= "init"
+	>
+		<echo>Creating MySQL database structure...</echo>
+		<exec dir="${build.dir}/sql" executable="mysql" failonerror="true" input="${build.dir}/sql/db_create.sql" >
+			<arg line="--user=${db.username} --password=${db.password} --host=${db.host} ${db.dbname}" />
+		</exec>
+		<echo>Loading data...</echo>
+		<exec dir="${build.dir}/sql" executable="mysql" failonerror="true" input="${build.dir}/sql/db_data.sql" >
+			<arg line="--user=${db.username} --password=${db.password} --host=${db.host} ${db.dbname}" />
+		</exec>
+		<echo>Complete.</echo>
+	</target>	
+
+	<target
+		name		= "dbDumpStructure"
+		description	= "Creates a dump of the database structure."
+		depends		= "init" 
+	>
+		<echo>Dumping db structure for: ${db.dbname}@${db.host}</echo>
+		<exec dir="${build.dir}/sql" executable="mysqldump" failonerror="true" output="${build.dir}/sql/${db.dbname}_structure.sql" >
+			<arg line="--opt --no-data --user=${db.username} --password=${db.password} --host=${db.host} ${db.dbname}" />
+		</exec>
+		<echo>Complete!</echo>
+	</target>		
+		
+	<target
+		name		= "dbDumpContent"
+		description	= "Creates a dump of the database content."
+		depends		= "init" 
+	>
+		<echo>Dumping db content for: ${db.dbname}@${db.host}</echo>
+		<exec dir="${build.dir}/sql" executable="mysqldump" failonerror="true" output="${build.dir}/sql/${db.dbname}_content.sql" >
+			<arg line="--opt --no-create-info --user=${db.username} --password=${db.password} --host=${db.host} ${db.dbname}" />
+		</exec>
+		<echo>Complete!</echo>
+	</target>		
+
+	<target
+		name		= "dbDump"
+		description	= "Creates a dump of the database content containing content and structure in one."
+		depends		= "init" 
+	>
+		<echo>Dumping db content for: ${db.dbname}@${db.host}</echo>
+		<exec dir="${build.dir}/sql" executable="mysqldump" failonerror="true" output="${build.dir}/sql/${db.dbname}_combined.sql" >
+			<arg line="--opt --user=${db.username} --password=${db.password} --host=${db.host} ${db.dbname}" />
+		</exec>
+		<echo>Complete!</echo>
+	</target>		
+
+</project>

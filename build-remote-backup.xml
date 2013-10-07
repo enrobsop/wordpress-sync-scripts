@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	File:		build-remote-backup.xml
+	Author:		Paul Osborne, Morley Computing Ltd.
+				http://www.javaphpprogrammer.co.uk/ 
+				http://www.morley-computing.co.uk/
+ -->
+<project name="build-remote-backup.xml">
+
+	<description>
+		Provides targets for compressing and downloading a remote website and database.
+	</description>
+	
+	<!-- Create default targets and properties. -->
+	<import file="build-common.xml" />
+	
+	<target 
+		name		= "downloadRemote"
+		description	= "Downloads the database and website documents."
+		depends		= "clean, init, uploadBackupScript, executeRemoteBackupScript, deleteRemoteBackupScript, downloadRemoteBackupFile"
+	/>
+	
+	<target 
+		name		= "uploadBackupScript"
+		description	= "Uploads a script to the database which when executed creates a backup of the website and database."
+	>
+		<copy
+			file		= "${src.htdocs.dir}/performRemoteBackup.php"
+			tofile		= "${build.dir}/downloads/${backup.script.file}"
+			filtering	= "true"
+		/>
+		<ftp 
+			password	= "${ftp.password}" 
+			server		= "${ftp.host}" 
+			userid		= "${ftp.username}"
+			remotedir	= "${ftp.public.dir}"			
+		>
+			<fileset dir="${build.dir}/downloads" includes="${backup.script.file}" />
+		</ftp>	
+	</target>
+
+	<target 
+		name		= "uploadInstallScript"
+		description	= "Uploads a script install a database and website files."
+	>
+		<copy
+			file		= "${src.htdocs.dir}/performRemoteInstall.php"
+			tofile		= "${dist.dir}/${install.script.file}"
+			filtering	= "true"
+		/>
+		<ftp 
+			password	= "${ftp.password}" 
+			server		= "${ftp.host}" 
+			userid		= "${ftp.username}"
+			remotedir	= "${ftp.public.dir}"			
+		>
+			<fileset dir="${dist.dir}" includes="${install.script.file}" />
+		</ftp>	
+	</target>
+	
+	<target 
+		name		= "deleteRemoteBackupScript"
+		description	= "Downloads the [domain]-full-backup.tar.gz."
+	>
+		<ftp 
+			action		= "delete"		
+			password	= "${ftp.password}" 
+			server		= "${ftp.host}" 
+			userid		= "${ftp.username}"
+			remotedir	= "${ftp.public.dir}"			
+		>
+			<fileset dir="." includes="${backup.script.file}" />
+		</ftp>	
+	</target>
+
+	<target 
+		name		= "deleteRemoteInstallScript"
+		description	= "Downloads the [domain]-full-backup.tar.gz."
+	>
+		<ftp 
+			action		= "delete"		
+			password	= "${ftp.password}" 
+			server		= "${ftp.host}" 
+			userid		= "${ftp.username}"
+			remotedir	= "${ftp.public.dir}"			
+		>
+			<fileset dir="." includes="${install.script.file}" />
+		</ftp>	
+	</target>
+
+	<target 
+		name		= "executeRemoteBackupScript"
+		description	= "Executes the backup script installed on the remote server."
+		depends 	= "">
+		<get 
+			src			= "${root.url}/${backup.script.file}" 
+		    dest		= "${build.dir}/logs/remote-backup-log.html" 
+			verbose		= "true"
+			username	= "${htusername}"
+			password	= "${htpassword}"
+		/>		
+	</target>
+	
+	<target 
+		name		= "executeRemoteInstallScript"
+		description	= "Executes the install script installed on the remote server."
+		depends 	= "">
+		<get 
+			src			= "${root.url}/${install.script.file}" 
+		    dest		= "${build.dir}/logs/remote-install-log.html" 
+			verbose		= "true"
+			username	= "${htusername}"
+			password	= "${htpassword}"
+		/>		
+	</target>
+
+	<target 
+		name		= "downloadRemoteBackupFile"
+		description	= "Downloads the [domain]-full-backup.tar.gz."
+	>
+		<ftp 
+			action		= "get"		
+			password	= "${ftp.password}" 
+			server		= "${ftp.host}" 
+			userid		= "${ftp.username}"
+			remotedir	= "${ftp.private.dir}"
+			
+		>
+			<fileset dir="${build.dir}/downloads" includes="${domain.name}-full-backup.tar.gz" />
+		</ftp>	
+	</target>
+	
+
+</project>
