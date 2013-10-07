@@ -23,10 +23,11 @@
 	<target 
 		name		= "uploadBackupScript"
 		description	= "Uploads a script to the database which when executed creates a backup of the website and database."
+		depends		= "clean, init"
 	>
 		<copy
-			file		= "${src.htdocs.dir}/performRemoteBackup.php"
-			tofile		= "${build.dir}/downloads/${backup.script.file}"
+			file		= "${scripts.php.dir}/performRemoteBackup.php"
+			tofile		= "${build.dir}/scripts/${backup.script.file}"
 			filtering	= "true"
 		/>
 		<ftp 
@@ -35,7 +36,7 @@
 			userid		= "${ftp.username}"
 			remotedir	= "${ftp.public.dir}"			
 		>
-			<fileset dir="${build.dir}/downloads" includes="${backup.script.file}" />
+			<fileset dir="${build.dir}/scripts" includes="${backup.script.file}" />
 		</ftp>	
 	</target>
 
@@ -126,7 +127,9 @@
 			remotedir	= "${ftp.private.dir}"
 			
 		>
-			<fileset dir="${build.dir}/downloads" includes="${domain.name}-full-backup.tar.gz" />
+			<fileset dir="${build.dir}/downloads" >
+				<filename name="${domain.name}-full-backup.tar.gz" />
+			</fileset>
 		</ftp>	
 	</target>
 	

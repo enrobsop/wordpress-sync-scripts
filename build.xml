@@ -35,20 +35,11 @@
 		name		= "download"
 		description	= "Downloads the remote website overwriting the local database and webfiles."
 		depends		= "downloadRemote, extractDownload, installDownload" >
-		
-		<delete includeemptydirs="true" >
-			<fileset 
-				dir				= "${src.htdocs.dir}" 
-				excludes		= "**/performRemoteBackup.php, **/performRemoteInstall.php" 
-				defaultexcludes	= "false"	/>
-		</delete>
-
-		
 	</target>
 	
 	<target 
 		name		= "extractDownload"
-		description	= "Extracts the archive downloaded by download from the remote website."
+		description	= "Extracts the archive from the remote website."
 		depends		= ""
 	>
 

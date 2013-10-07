@@ -10,6 +10,7 @@ $dbName		= '@db.dbname@';
 $dbHost		= '@db.host@';
 $dbUsername	= '@db.username@';
 $dbPassword	= '@db.password@';
+$excludes   = "--exclude='@backup.exclude.pattern@' --exclude='@backup.script.file@' --exclude='@install.script.file@'";
 
 echo "Init: checking configuration...<br />";
 $docroot = realpath(dirname(__FILE__));
@@ -38,7 +39,7 @@ system("tar -czf $basedir/db_dump.tar.gz -C $basedir db_dump.sql");
 echo "MySQL: Complete.<br />";
 
 echo "Website: Adding website files to archive file...<br />";
-system("tar -czf $basedir/$domain.tar.gz *");
+system("tar -czf $basedir/$domain.tar.gz $excludes *");
 echo "Website: Complete.<br />";
 
 echo "Archive: Adding database and website files to combined archive file...<br />";
@@ -50,6 +51,5 @@ system("rm $basedir/db_dump.sql");
 system("rm $basedir/db_dump.tar.gz");
 system("rm $basedir/$domain.tar.gz");
 echo "Tidy: Complete.<br />";
-
 
 ?>

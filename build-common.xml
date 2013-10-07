@@ -26,9 +26,11 @@
 	<target name="init" description="Initializes the build environment." >
 		<!-- Create the time and date stamps -->
 		<tstamp />
+	 	<mkdir dir="${src.htdocs.dir}" />
 		<mkdir dir="${dist.dir}" />
 		<mkdir dir="${build.dir}/htdocs" />
 		<mkdir dir="${build.dir}/sql" />
+		<mkdir dir="${build.dir}/scripts" />
 		<mkdir dir="${build.dir}/logs" />
 	 	<mkdir dir="${build.dir}/test/logs"/>
 	 	<mkdir dir="${build.dir}/downloads"/>
@@ -38,7 +40,7 @@
 			filtering	="true"
 			description	="Copy sql to the build directing filtering any tokens such as db name."
 		>
-			<fileset dir="${src.sql.dir}" includes="*.sql" />
+			<fileset dir="${scripts.sql.dir}" includes="*.sql" />
 		</copy>
 	</target>
 		
