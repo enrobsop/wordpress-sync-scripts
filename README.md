@@ -1,4 +1,4 @@
-# Ant & PHP scripts to sync dev and live environaments
+# Ant/PHP scripts to sync dev and live environaments
 ## What does it do?
 It's a collection of Ant and PHP scripts designed to simplify switching between _dev_ and _live_ WordPress websites. With these scripts, a developer can use a single command to download or upload a WordPress site, along with its database (optional). This way, the site can be worked on without risk to the live site content.
 
