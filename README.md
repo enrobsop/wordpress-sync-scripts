@@ -1,23 +1,21 @@
 # What does it do?
-It's a collection of Ant and PHP scripts designed to simplify the development process on live WordPress websites.
-
-It permits a developer to use a single command to download a WordPress site along with it's database to a local development machine where it can be worked on with no risk to the live site.
-
-### Warning
-1. __THIS SCRIPT DELETES STUFF! [Source control of your files and data and/or make backups first!]__
-2. This script(s) is a few years old now and there may be better ways to do this now. Please let me know.
-
-## Motivation
-* Working on a live site is rarely advisable anyway.
-* CMS development is often greatly simplified when working with recent site content.
-* Switching between _live_ and _dev_ databases on a dev machine risks live content being deleted or corrupted.
-* Shared-hosting packages, as used by many WP sites, provide minimal tools to update source code and data. FTP is typically the only option - automating this is saves time and cuts down on errors.
-* Updates may be spread out over time and the content on the developer machine quickly becomes outdated. It is very useful to be able to download the latest version of everything quickly. Especially, if ad-hoc coding changes have been performed directly on the server by 'someone else'.
-* Being able to cleanly sync code allows for easier source-control and identification of bug causes.
+It's a collection of Ant and PHP scripts designed to simplify switching between _dev_ and _live_ WordPress websites. With these scripts, a developer can use a single command to download or upload a WordPress site, along with its database (optional). This way, the site can be worked on without risk to the live site content.
 
 ## Functionality
 * Allows a developer to work offline using a full *copy* of a WordPress website including the PHP source and database.
 * Allows a developer to upload the new source code only or source code and data.
+
+### Warning
+1. __THIS SCRIPT DELETES! [Source control your files and data and/or make backups first!]__
+2. It is also a few years old and there may be better ways to achieve this now.
+
+## Motivation
+* Working on a live site directly is rarely advisable.
+* Recent, real CMS content helps with offline development.
+* Switching between _live_ and _dev_ environments increases the risk of deletion or corruption of live content.
+* Shared-hosting packages, as used by many WordPress sites, provide limited tool sets for updating source code and data. FTP is often the only option - automating this process saves time and cuts down on errors.
+* The content on the developer machine becomes outdated. It is very useful to be able to download the latest version of everything quickly and reliably. Especially, if ad-hoc coding changes have been performed directly on the server by 'someone else'.
+* Being able to cleanly sync code allows for easier source-control and identification of bug causes.
 
 # Quick Start
 
@@ -35,5 +33,5 @@ It permits a developer to use a single command to download a WordPress site alon
 * A local and remote MySQL database.
 
 # Common problems
-## Problem: failed to create task or type ftp Cause: the class org.apache.tools.ant.taskdefs.optional.net.FTP was not found.
+## Problem: `failed to create task or type ftp Cause: the class org.apache.tools.ant.taskdefs.optional.net.FTP was not found.`
 FTP has not been configured for Ant. Please see the Ant documentation for details of the optional resources needed by FTP.
